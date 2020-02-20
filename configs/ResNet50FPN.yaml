@@ -4,30 +4,31 @@ DATA:
     FOLD: 0
     IN_CHANS: 3
     CUTMIX: True
-    IMG_SIZE: 640
+    IMG_SIZE: 256
 
 TRAIN:
-    EPOCHS: 300
+    EPOCHS: 50
     BATCH_SIZE: 32
 
 OPT:
-    WARMUP_EPOCHS: 30
+    WARMUP_EPOCHS: 5
     BASE_LR: 1e-3
-    WEIGHT_DECAY: 0.0
+    WEIGHT_DECAY: 0.01
+    GD_STEPS: 1
+    SWA:
+        START: 20
+        FREQ: 2
 
 MODEL:
     BACKBONE:
         NAME: "swsl_resnet50"
         OUT_FEATURES: ["res2", "res3", "res4", "res5"]
-        OUTPUT_STRIDE: 32
+        OUTPUT_STRIDE: 8
     FPN:
         NORM: "BN"
     SEM_SEG_HEAD:
-        NUM_CLASSES: 5
+        NUM_CLASSES: 2
         NORM: "BN"
 
 LOSS:
-    NAME: "dice"
-
-OPT:
-    GD_STEPS: 1
+    NAME: "bce"

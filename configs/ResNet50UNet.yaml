@@ -4,33 +4,31 @@ DATA:
     FOLD: 0
     IN_CHANS: 3
     CUTMIX: True
-    IMG_SIZE: 640
+    IMG_SIZE: 256
 
 TRAIN:
-    EPOCHS: 300
+    EPOCHS: 50
     BATCH_SIZE: 32
 
 OPT:
-    WARMUP_EPOCHS: 30
+    WARMUP_EPOCHS: 5
     BASE_LR: 1e-3
-    WEIGHT_DECAY: 0.0
+    WEIGHT_DECAY: 0.01
+    GD_STEPS: 1
 
 MODEL:
     NAME:
         "UNetSegmentor"
     BACKBONE:
-        NAME: "swsl_resnet50"
+        NAME: "swsl_resnext50_32x4d"
         OUT_FEATURES: ["res2", "res3", "res4", "res5"]
         OUTPUT_STRIDE: 8
     SEM_SEG_HEAD:
         NAME: "UNetHead"
         IN_FEATURES: ["res2", "res3", "res4", "res5"]
-        NUM_CLASSES: 5
+        NUM_CLASSES: 2
         NORM: "BN"
         CONVS_DIM: 32
 
 LOSS:
-    NAME: "dice"
-
-OPT:
-    GD_STEPS: 1
+    NAME: "dicebce"

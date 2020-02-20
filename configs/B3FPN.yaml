@@ -1,18 +1,18 @@
 EXP: "B3FPN_fold0"
 
 DATA:
-    FOLD: 0
+    FOLD: 1
     IN_CHANS: 3
     CUTMIX: False
-    IMG_SIZE: 512
+    IMG_SIZE: 256
 
 TRAIN:
-    EPOCHS: 50
-    BATCH_SIZE: 16
+    EPOCHS: 100
+    BATCH_SIZE: 64
 
 OPT:
-    WARMUP_EPOCHS: 5
-    BASE_LR: 4e-5
+    WARMUP_EPOCHS: 10
+    BASE_LR: 2e-3
     WEIGHT_DECAY: 0.0
     GD_STEPS: 1
 
@@ -20,15 +20,15 @@ MODEL:
     BACKBONE:
         NAME: "tf_efficientnet_b3"
         FUNC_NAME: "build_efficientnet_backbone"
-        OUT_FEATURES: ["block3", "block4", "block5", "block6", "head"]
+        OUT_FEATURES: ["block4", "block5", "block6", "head"]
     FPN:
-        IN_FEATURES: ["block3", "block4", "block5", "block6", "head"]
+        IN_FEATURES: ["block4", "block5", "block6", "head"]
         NORM: "BN"
     SEM_SEG_HEAD:
-        IN_FEATURES: ["block3", "block4", "block5", "block6", "head"]
+        IN_FEATURES: ["block4", "block5", "block6", "head"]
         CONVS_DIM: 64
         NUM_CLASSES: 2
         NORM: "BN"
 
 LOSS:
-    NAME: "dice"
+    NAME: "dicebce"
