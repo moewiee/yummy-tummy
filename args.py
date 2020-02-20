@@ -19,8 +19,8 @@ def parse_args():
                         help="enable evaluation mode for validation")
     parser.add_argument("--test", action="store_true",
                         help="enable evaluation mode for testset")
-    parser.add_argument("--tta", action="store_true",
-                        help="enable tta infer")
+    parser.add_argument("--holdout", action="store_true",
+                        help="use holdout set for validation")
     parser.add_argument("--swa", action="store_true",
                         help="finetune swa cycle")
     parser.add_argument("-d", "--debug", action="store_true",

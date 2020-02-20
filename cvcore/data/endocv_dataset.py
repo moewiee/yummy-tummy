@@ -17,12 +17,15 @@ from albumentations import pytorch
 class EDDDataset(Dataset):
     def __init__(self, cfg, mode="train"):
         super(EDDDataset, self).__init__()
+        assert mode in ("train", "valid", "test", "holdout")
         self.data_dir = cfg.DIRS.DATA
         self.mask0_dir = cfg.DIRS.MASK0
         self.mask1_dir = cfg.DIRS.MASK1
         self.img_size = (cfg.DATA.IMG_SIZE, cfg.DATA.IMG_SIZE)
-        if mode != "test":
+        if mode in ("train", "valid"):
             self.df = pd.read_csv(f"./data/slices_mask/{mode}_fold{cfg.DATA.FOLD}.csv")
+        if mode == "holdout":
+            self.df = pd.read_csv(f"./data/slices_mask/holdout.csv")
         if mode == "train":
             self.aug = A.Compose([
                 # A.OneOf([
@@ -72,7 +75,7 @@ class EDDDataset(Dataset):
             mask = np.zeros((*img.shape[:-1], 2))
             mask[..., 0] = np.asarray(Image.open(os.path.join(self.mask0_dir, img_id + ".jpg")).convert('L'), dtype=np.uint8)
             mask[..., 1] = np.asarray(Image.open(os.path.join(self.mask1_dir, img_id + ".jpg")).convert('L'), dtype=np.uint8)
-            mask = np.where(mask > 0, 255, 0)
+            mask = np.where(mask > 100, 255, 0)
             img = cv2.resize(img, self.img_size,
                 interpolation=cv2.INTER_LINEAR)
             mask = cv2.resize(mask, self.img_size,

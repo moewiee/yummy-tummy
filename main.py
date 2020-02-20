@@ -133,7 +133,10 @@ def main(args, cfg):
 
     # Load and split data
     train_loader = make_dataloader(cfg, "train")
-    valid_loader = make_dataloader(cfg, "valid")
+    if not args.holdout:
+        valid_loader = make_dataloader(cfg, "valid")
+    else:
+        valid_loader = make_dataloader(cfg, "holdout")
 
     scheduler = WarmupCyclicalLR("cos", cfg.OPT.BASE_LR, cfg.TRAIN.EPOCHS,
                                  iters_per_epoch=len(train_loader),
