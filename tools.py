@@ -7,7 +7,7 @@ from tqdm import tqdm
 from pytorch_toolbelt.inference import tta as pytta
 
 from cvcore.data import cutmix_data, mixup_data, mixup_criterion
-from cvcore.modeling.loss import binary_iou_metric
+from cvcore.modeling.loss import binary_iou_metric, binary_dice_metric
 from cvcore.modeling.loss import binary_dice_loss, binary_iou_loss
 from cvcore.utils import AverageMeter, save_checkpoint
 
@@ -20,21 +20,28 @@ def valid_model(_print, cfg, model, valid_loader,
     # switch to evaluate mode
     model.eval()
 
-    valid_iou = []
+    # valid_iou = []
     tbar = tqdm(valid_loader)
+    outputs = []
+    masks = []
+
 
     with torch.no_grad():
         for i, (image, mask) in enumerate(tbar):
             image = image.cuda()
             mask = mask.cuda()
             output = model(image)
-            num_classes = mask.shape[1]
-            batch_iou = binary_iou_metric(output, mask).cpu()
-            valid_iou.append(batch_iou)
+            outputs.append(output)
+            masks.append(mask)
+            # batch_iou = binary_dice_metric(output, mask).cpu()
+            # valid_iou.append(batch_iou)
+        outputs = torch.cat(outputs,0)
+        masks = torch.cat(masks,0)
+        valid_iou = binary_dice_metric(outputs, masks).cpu().mean(0).numpy()
 
     # record IoU over foreground classes and background
     # TODO: compute IoU for background
-    valid_iou = torch.cat(valid_iou, 0).mean(0).numpy()
+    # valid_iou = torch.cat(valid_iou, 0).mean(0).numpy()
     final_score = np.average(valid_iou)
     log_info = "Mean 2IoInU: %.4f - mask0: %.4f - mask1: %.4f"
     _print(log_info % (final_score, valid_iou[0], valid_iou[1]))
@@ -84,8 +91,8 @@ def train_loop(_print, cfg, model, train_loader,
         if isinstance(criterion, torch.nn.BCEWithLogitsLoss):
             output = torch.flatten(output, 1, -1)
             mask = torch.flatten(mask, 1, -1)
-        # loss = criterion(output, mask)
-        loss = binary_dice_loss(output, mask) + binary_iou_loss(output, mask)
+        loss = criterion(output, mask)
+        # loss = binary_dice_loss(output, mask) + binary_iou_loss(output, mask)
         # gradient accumulation
         loss = loss / cfg.OPT.GD_STEPS
         if cfg.SYSTEM.FP16:
