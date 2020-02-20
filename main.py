@@ -209,8 +209,6 @@ if __name__ == "__main__":
 
     if args.config != "":
         cfg.merge_from_file(args.config)
-    if args.mode != "train":
-        cfg.merge_from_list(['INFER.TTA', args.tta])
     if args.debug:
         opts = ["DEBUG", True, "TRAIN.EPOCHS", 2]
         cfg.merge_from_list(opts)

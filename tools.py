@@ -62,6 +62,9 @@ def valid_model(_print, cfg, model, valid_loader,
         save_checkpoint(save_dict, is_best,
                         root=cfg.DIRS.WEIGHTS, filename=save_filename)
         return best_metric
+    else:
+        np.save("prediction.npy", torch.sigmoid(outputs.numpy()))
+        np.save("masks.npy", masks.numpy())
 
 
 def test_model(_print, cfg, model, test_loader):
@@ -185,7 +188,7 @@ def bn_update(loader, model):
     model.apply(lambda module: _get_momenta(module, momenta))
     n = 0
     tbar = tqdm(loader)
-    for i, (input, _, _, _, _) in enumerate(tbar):
+    for i, (input, _) in enumerate(tbar):
         input = input.cuda(non_blocking=True)
         input_var = torch.autograd.Variable(input)
         b = input_var.data.size(0)
