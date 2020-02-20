@@ -118,20 +118,25 @@ def binary_dice_metric(logit, target, thresh=0.5):
     pred = (torch.sigmoid(logit) > thresh).float()
     intersection = (pred * target).sum((-1, -2))
     union = pred.sum((-1, -2)) + target.sum((-1, -2)) - intersection
-    dice =  (2*intersection + 1e-6) / (union + 1e-6)
+    dice =  (2*intersection + 1e-6) / (intersection + union + 1e-6)
     return dice
 
 
 def binary_dice_loss(logit, target):
     prob = torch.sigmoid(logit)
     intersection = (prob * target).sum((-1, -2))
-    dice = (2. * intersection) / (prob.sum((-1, -2)) + target.sum((-1, -2)) + 1e-6)
+    dice = (2. * intersection + 1e-6) / (prob.sum((-1, -2)) + target.sum((-1, -2)) + 1e-6)
     return (1. - dice).mean()
 
 
 class BinaryDiceLoss(nn.Module):
     def forward(self, logit, target):
         return binary_dice_loss(logit, target)
+
+
+class BinaryDiceCELoss(nn.Module):
+    def forward(self, logit, target):
+        return (binary_dice_loss(logit, target) + F.binary_cross_entropy_with_logits(logit, target)) / 2.
 
 
 def binary_iou_metric(logit, target, thresh=0.5):
