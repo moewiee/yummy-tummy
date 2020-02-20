@@ -16,7 +16,7 @@ from torch.utils.data import DataLoader, Subset
 from cvcore.configs import get_cfg_defaults
 from cvcore.data.endocv_dataset import EDDDataset
 from cvcore.modeling.loss import BinaryDiceLoss, BinaryIoULoss, \
-    SigmoidFocalLoss
+    SigmoidFocalLoss, BinaryDiceCELoss
 from cvcore.modeling.semantic_seg import build_sem_seg_model
 from cvcore.solver import make_optimizer, WarmupCyclicalLR
 from cvcore.utils import setup_determinism, setup_logger
@@ -76,6 +76,8 @@ def main(args, cfg):
         train_criterion = BinaryDiceLoss()
     elif cfg.LOSS.NAME == "focal":
         train_criterion = SigmoidFocalLoss()
+    elif cfg.LOSS.NAME == "dicebce":
+        train_criterion = BinaryDiceCELoss()
 
     # CUDA & Mixed Precision
     if cfg.SYSTEM.CUDA:
