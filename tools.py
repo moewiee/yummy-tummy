@@ -31,8 +31,8 @@ def valid_model(_print, cfg, model, valid_loader,
             image = image.cuda()
             mask = mask.cuda()
             output = model(image)
-            outputs.append(output)
-            masks.append(mask)
+            outputs.append(output.cpu())
+            masks.append(mask.cpu())
             # batch_iou = binary_dice_metric(output, mask).cpu()
             # valid_iou.append(batch_iou)
         outputs = torch.cat(outputs,0)
@@ -107,10 +107,10 @@ def train_loop(_print, cfg, model, train_loader,
             optimizer.zero_grad()
         # record loss
         losses.update(loss.item() * cfg.OPT.GD_STEPS, image.size(0))
-        tbar.set_description("Train loss: %.5f, learning rate: %.6f" % (
+        tbar.set_description("Train loss: %.5f, lr: %.6f" % (
             losses.avg, optimizer.param_groups[-1]['lr']))
 
-    _print("Train loss: %.5f, learning rate: %.6f" %
+    _print("Train loss: %.5f, lr: %.6f" %
            (losses.avg, optimizer.param_groups[-1]['lr']))
 
 
