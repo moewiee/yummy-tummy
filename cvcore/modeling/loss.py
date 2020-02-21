@@ -121,6 +121,15 @@ def binary_dice_metric(logit, target, thresh=0.5):
     dice =  (2*intersection + 1e-6) / (intersection + union + 1e-6)
     return dice
 
+def global_dice_metric(logit, target, thresh=0.5):
+    pred = (torch.sigmoid(logit) > thresh).float().permute(1,0,2,3).reshape(2,-1)
+    target = target.permute(1,0,2,3).reshape(2,-1)
+    # print(pred.size(), target.size())
+    intersection = (pred * target).sum(1)
+    union = pred.sum(1) + target.sum(1) - intersection
+    dice = 2 * intersection / (union + intersection)
+    return dice
+
 
 def binary_dice_loss(logit, target):
     prob = torch.sigmoid(logit)
