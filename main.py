@@ -119,7 +119,8 @@ def main(args, cfg):
                 optimizer.load_state_dict(ckpt.pop('optimizer'))
                 if args.mode == "cycle":
                     start_cycle = ckpt["cycle"]
-                start_epoch, best_metric = ckpt['epoch'], ckpt['best_metric']
+                if not args.reset:
+                    start_epoch, best_metric = ckpt['epoch'], ckpt['best_metric']
             logger.info(
                 f"=> loaded checkpoint '{args.load}' (epoch {ckpt['epoch']}, best_metric: {ckpt['best_metric']})")
             if args.mode == "swa":

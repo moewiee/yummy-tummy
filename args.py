@@ -25,6 +25,8 @@ def parse_args():
                         help="finetune swa cycle")
     parser.add_argument("-d", "--debug", action="store_true",
                         help="enable debug mode for test")
+    parser.add_argument("--reset", action="store_true",
+                        help="reset epoch and best metric")
 
     args = parser.parse_args()
     if args.cycle:
