@@ -7,7 +7,7 @@ from tqdm import tqdm
 from pytorch_toolbelt.inference import tta as pytta
 
 from cvcore.data import cutmix_data, mixup_data, mixup_criterion
-from cvcore.modeling.loss import binary_iou_metric, binary_dice_metric
+from cvcore.modeling.loss import binary_iou_metric, binary_dice_metric, global_dice_metric
 from cvcore.modeling.loss import binary_dice_loss, binary_iou_loss
 from cvcore.utils import AverageMeter, save_checkpoint
 
@@ -31,13 +31,17 @@ def valid_model(_print, cfg, model, valid_loader,
             image = image.cuda()
             mask = mask.cuda()
             output = model(image)
+            if not checkpoint:
+                image_lr = torch.flip(image, (-1,))
+                output += torch.flip(model(image_lr), (-1,))
+                output /= 2
             outputs.append(output.cpu())
             masks.append(mask.cpu())
             # batch_iou = binary_dice_metric(output, mask).cpu()
             # valid_iou.append(batch_iou)
         outputs = torch.cat(outputs,0)
         masks = torch.cat(masks,0)
-        valid_iou = binary_dice_metric(outputs, masks).cpu().mean(0).numpy()
+        valid_iou = global_dice_metric(outputs, masks).cpu().numpy()
 
     # record IoU over foreground classes and background
     # TODO: compute IoU for background
@@ -63,7 +67,7 @@ def valid_model(_print, cfg, model, valid_loader,
                         root=cfg.DIRS.WEIGHTS, filename=save_filename)
         return best_metric
     else:
-        np.save("prediction.npy", torch.sigmoid(outputs.numpy()))
+        np.save("prediction.npy", torch.sigmoid(outputs).numpy())
         np.save("masks.npy", masks.numpy())
 
 
